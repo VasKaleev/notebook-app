@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "Мои заметки",
+    "slug": "notebook-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "notebook",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vasilyk.notebook"
+    },
+    "android": {
+      "package": "com.vasilyk.notebook",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6750A4"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-sqlite",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#6750A4"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Разрешить «Мои заметки» доступ к фото для прикрепления к заметкам.",
+          "cameraPermission": "Разрешить «Мои заметки» использовать камеру для фото к заметкам."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Разрешить «Мои заметки» использовать Face ID для защиты ваших записей."
+        }
+      ],
+      "expo-notifications",
+      "@react-native-community/datetimepicker",
+      "expo-localization",
+      "expo-system-ui",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "NotesWidget",
+              "label": "Мои заметки",
+              "description": "Последние заметки на главном экране",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6286d782-8a12-42fd-80f8-93801cde2a38"
+      }
+    }
+  }
+}

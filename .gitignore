@@ -1,0 +1,28 @@
+# Expo
+.expo/
+dist/
+web-build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Native
+android/
+ios/
+
+# Metro
+.metro-health-check*
+
+# Misc
+.DS_Store
+*.log
+.env
+
+
+# Исключаем артефакты сборки
+android/build/
+android/app/build/
+
+
