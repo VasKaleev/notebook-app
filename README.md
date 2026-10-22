@@ -209,9 +209,9 @@ MIT License. Смотри LICENSE.
 
     Автор: Vasily K.
 
-    Email: vasilyk@example.com
+    Email: kaleev.fam@mail.ru
 
-    GitHub: @vasilyk
+    GitHub: https://github.com/VasKaleev
 
 🙏 Благодарности
 
