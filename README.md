@@ -150,17 +150,17 @@ eas build --platform android --profile production
 text
 
 src/
-├── components/ UI-компоненты (NoteCard, SearchBar, EmptyState, SortMenu, HighlightedText, ErrorBoundary)
-├── screens/ Экраны (NotesList, NoteEdit, Categories, Trash, Settings, Onboarding, Lock)
-├── navigation/ React Navigation (RootNavigator, TabsNavigator, types)
-├── store/ Zustand (notesStore, categoriesStore, settingsStore)
-├── db/ SQLite (database, schema, migrations, queue, repositories)
-├── services/ Нативные сервисы (notifications, attachments)
-├── widgets/android/ Android-виджет (NotesWidget, widget-task-handler)
-├── hooks/ useDebounce, useBiometricAuth
-├── theme/ Material Design 3 темы
-├── i18n/ Локализация (ru.json, en.json, index.ts)
-└── types/ TypeScript-типы (Note, Category, Attachment, ChecklistItem)
+### ├── components/ UI-компоненты (NoteCard, SearchBar, EmptyState, SortMenu, HighlightedText, ErrorBoundary)
+### ├── screens/ Экраны (NotesList, NoteEdit, Categories, Trash, Settings, Onboarding, Lock)
+### ├── navigation/ React Navigation (RootNavigator, TabsNavigator, types)
+### ├── store/ Zustand (notesStore, categoriesStore, settingsStore)
+### ├── db/ SQLite (database, schema, migrations, queue, repositories)
+### ├── services/ Нативные сервисы (notifications, attachments)
+### ├── widgets/android/ Android-виджет (NotesWidget, widget-task-handler)
+### ├── hooks/ useDebounce, useBiometricAuth
+### ├── theme/ Material Design 3 темы
+### ├── i18n/ Локализация (ru.json, en.json, index.ts)
+### └── types/ TypeScript-типы (Note, Category, Attachment, ChecklistItem)
 
 assets/ Иконки, splash
 docs/screenshots/ Скриншоты для README
