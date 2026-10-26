@@ -29,6 +29,7 @@ const EMPTY_ATTACHMENTS: Attachment[] = [];
 
 export default function NoteEditScreen() {
   const { t, i18n } = useTranslation();
+
   const route = useRoute<RouteProp<RootStackParamList, 'NoteEdit'>>();
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const initialNoteId = route.params?.noteId;
@@ -42,7 +43,6 @@ export default function NoteEditScreen() {
   const error = useNotesStore((s) => s.error);
   const clearError = useNotesStore((s) => s.clearError);
 
-  // Чек-листы
   const checklists = useNotesStore((s) => s.checklists);
   const loadChecklist = useNotesStore((s) => s.loadChecklist);
   const addChecklistItem = useNotesStore((s) => s.addChecklistItem);
@@ -61,6 +61,8 @@ export default function NoteEditScreen() {
     existing?.categoryId ?? initialCategoryId,
   );
   const [noteType, setNoteType] = useState<'text' | 'checklist'>(existing?.noteType ?? 'text');
+  console.log('[NoteEdit] RENDER v2', { noteType });
+
   const [catMenuOpen, setCatMenuOpen] = useState(false);
 
   // ----- Вложения -----
@@ -89,7 +91,6 @@ export default function NoteEditScreen() {
 
   const save = async (): Promise<string | null> => {
     if (isSaving.current) return noteId;
-    // Для чек-листа content может быть пустым — сохраняем, если есть пункты
     const hasChecklist = noteId ? (checklists[noteId] ?? []).length > 0 : false;
     if (!title.trim() && !content.trim() && !hasChecklist) return noteId;
 
@@ -137,18 +138,14 @@ export default function NoteEditScreen() {
     if (noteId) void loadAttachments(noteId);
   }, [noteId, loadAttachments]);
 
-  // Загружаем чек-лист при открытии заметки-чек-листа
   useEffect(() => {
     if (noteId && noteType === 'checklist') void loadChecklist(noteId);
   }, [noteId, noteType, loadChecklist]);
 
   const checklistItems = noteId ? (checklists[noteId] ?? []) : [];
 
-  // ----- Смена режима -----
   const handleChangeMode = async (mode: 'text' | 'checklist') => {
     setNoteType(mode);
-    // Если переключаемся на чек-лист и заметка уже сохранена —
-    // сохраняем noteType в БД и загружаем пункты
     if (noteId) {
       await editNote(noteId, { noteType: mode });
       if (mode === 'checklist') void loadChecklist(noteId);
@@ -211,6 +208,13 @@ export default function NoteEditScreen() {
   const currentCategory = categoryId ? categories.find((c) => c.id === categoryId) : undefined;
 
   const dateLocale = i18n.language === 'ru' ? 'ru-RU' : 'en-US';
+  console.log('[NoteEdit] STRUCTURE', {
+    hasSegmented: true,
+    noteType,
+    hasContentField: noteType === 'text',
+    hasChecklist: noteType === 'checklist',
+    hasButtonRow: true,
+  });
 
   return (
     <KeyboardAvoidingView
@@ -223,6 +227,7 @@ export default function NoteEditScreen() {
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Заголовок */}
         <TextInput
           mode="flat"
           placeholder={t('notes.titlePlaceholder')}
@@ -248,98 +253,7 @@ export default function NoteEditScreen() {
           />
         </View>
 
-        {/* Категория */}
-        <View style={styles.row}>
-          <Menu
-            visible={catMenuOpen}
-            onDismiss={() => setCatMenuOpen(false)}
-            anchor={
-              <Button mode="outlined" icon="folder-outline" onPress={() => setCatMenuOpen(true)}>
-                {currentCategory?.name ?? t('notes.noCategory')}
-              </Button>
-            }>
-            <Menu.Item
-              title={t('notes.noCategory')}
-              onPress={() => {
-                setCategoryId(null);
-                scheduleSave();
-                setCatMenuOpen(false);
-              }}
-              leadingIcon={categoryId === null ? 'check' : undefined}
-            />
-            {categories.map((c) => (
-              <Menu.Item
-                key={c.id}
-                title={c.name}
-                onPress={() => {
-                  setCategoryId(c.id);
-                  scheduleSave();
-                  setCatMenuOpen(false);
-                }}
-                leadingIcon={categoryId === c.id ? 'check' : undefined}
-              />
-            ))}
-          </Menu>
-        </View>
-
-        {/* Напоминание */}
-        <View style={styles.row}>
-          <Button mode="outlined" icon="bell-outline" onPress={openDatePicker}>
-            {reminderDate
-              ? reminderDate.toLocaleString(dateLocale, {
-                  day: '2-digit',
-                  month: 'short',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-              : t('notes.remind')}
-          </Button>
-          {reminderDate && <IconButton icon="close" size={20} onPress={handleClearReminder} />}
-        </View>
-
-        {/* Фото-вложения */}
-        <View style={styles.row}>
-          <Menu
-            visible={photoMenuOpen}
-            onDismiss={() => setPhotoMenuOpen(false)}
-            anchor={
-              <Button mode="outlined" icon="image-plus" onPress={() => setPhotoMenuOpen(true)}>
-                {t('notes.photo')}
-              </Button>
-            }>
-            <Menu.Item
-              title={t('notes.fromGallery')}
-              onPress={handlePickFromGallery}
-              leadingIcon="image-multiple"
-            />
-            <Menu.Item
-              title={t('notes.fromCamera')}
-              onPress={handlePickFromCamera}
-              leadingIcon="camera"
-            />
-          </Menu>
-        </View>
-
-        {/* Миниатюры */}
-        {attachments.length > 0 && (
-          <View style={styles.attachments}>
-            {attachments.map((a) => (
-              <View key={a.id} style={styles.thumbWrap}>
-                <Image source={{ uri: a.uri }} style={styles.thumb} />
-                <IconButton
-                  icon="close-circle"
-                  size={18}
-                  style={styles.thumbRemove}
-                  onPress={() => {
-                    if (noteId) void removeAttachment(a.id, noteId);
-                  }}
-                />
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Тело: текст или чек-лист */}
+        {/* Тело: текст или чек-лист — СРАЗУ под переключателем */}
         {noteType === 'text' ? (
           <TextInput
             mode="flat"
@@ -408,6 +322,113 @@ export default function NoteEditScreen() {
           </View>
         )}
 
+        {/* Кнопки: Категория, Напомнить, Фото — в один ряд */}
+        <View style={styles.buttonRow}>
+          {/* Категория */}
+          <Menu
+            visible={catMenuOpen}
+            onDismiss={() => setCatMenuOpen(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                icon="folder-outline"
+                onPress={() => setCatMenuOpen(true)}
+                style={styles.actionBtn}>
+                {currentCategory?.name ?? t('notes.noCategory')}
+              </Button>
+            }>
+            <Menu.Item
+              title={t('notes.noCategory')}
+              onPress={() => {
+                setCategoryId(null);
+                scheduleSave();
+                setCatMenuOpen(false);
+              }}
+              leadingIcon={categoryId === null ? 'check' : undefined}
+            />
+            {categories.map((c) => (
+              <Menu.Item
+                key={c.id}
+                title={c.name}
+                onPress={() => {
+                  setCategoryId(c.id);
+                  scheduleSave();
+                  setCatMenuOpen(false);
+                }}
+                leadingIcon={categoryId === c.id ? 'check' : undefined}
+              />
+            ))}
+          </Menu>
+
+          {/* Напомнить */}
+          <Button
+            mode="outlined"
+            icon="bell-outline"
+            onPress={openDatePicker}
+            style={styles.actionBtn}>
+            {reminderDate
+              ? reminderDate.toLocaleString(dateLocale, {
+                  day: '2-digit',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : t('notes.remind')}
+          </Button>
+
+          {/* Фото */}
+          <Menu
+            visible={photoMenuOpen}
+            onDismiss={() => setPhotoMenuOpen(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                icon="image-plus"
+                onPress={() => setPhotoMenuOpen(true)}
+                style={styles.actionBtn}>
+                {t('notes.photo')}
+              </Button>
+            }>
+            <Menu.Item
+              title={t('notes.fromGallery')}
+              onPress={handlePickFromGallery}
+              leadingIcon="image-multiple"
+            />
+            <Menu.Item
+              title={t('notes.fromCamera')}
+              onPress={handlePickFromCamera}
+              leadingIcon="camera"
+            />
+          </Menu>
+        </View>
+
+        {/* Удалить напоминание — отдельно, под рядом кнопок */}
+        {reminderDate && (
+          <View style={styles.row}>
+            <IconButton icon="bell-off-outline" size={20} onPress={handleClearReminder} />
+            <Text variant="bodySmall">{t('notes.remind')}</Text>
+          </View>
+        )}
+
+        {/* Миниатюры */}
+        {attachments.length > 0 && (
+          <View style={styles.attachments}>
+            {attachments.map((a) => (
+              <View key={a.id} style={styles.thumbWrap}>
+                <Image source={{ uri: a.uri }} style={styles.thumb} />
+                <IconButton
+                  icon="close-circle"
+                  size={18}
+                  style={styles.thumbRemove}
+                  onPress={() => {
+                    if (noteId) void removeAttachment(a.id, noteId);
+                  }}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Пикер даты */}
         {pickerMode === 'date' && tempDate && (
           <DateTimePicker
@@ -461,13 +482,20 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16, paddingBottom: 48 },
   title: { fontSize: 20, backgroundColor: 'transparent', marginBottom: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   segmented: { flex: 1 },
   content: {
     fontSize: 16,
     minHeight: 240,
     backgroundColor: 'transparent',
     textAlignVertical: 'top',
+    marginBottom: 12,
   },
   hint: { marginTop: 12, opacity: 0.5, textAlign: 'center' },
   attachments: {
@@ -479,7 +507,7 @@ const styles = StyleSheet.create({
   thumbWrap: { position: 'relative' },
   thumb: { width: 88, height: 88, borderRadius: 8, backgroundColor: '#eee' },
   thumbRemove: { position: 'absolute', top: -6, right: -6 },
-  checklist: { marginTop: 8 },
+  checklist: { marginTop: 8, marginBottom: 12 },
   checklistRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -497,5 +525,17 @@ const styles = StyleSheet.create({
   addChecklistBtn: {
     alignSelf: 'flex-start',
     marginTop: 8,
+  },
+  // Ряд кнопок «Категория / Напомнить / Фото»
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  actionBtn: {
+    // Кнопки не растягиваются на всю ширину
+    flexShrink: 1,
   },
 });

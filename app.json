@@ -8,9 +8,16 @@
     "scheme": "notebook",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "expo": {
+      "owner": "vasilyk's team",
+      "slug": "notebook-app"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vasilyk.notebook"
+      "bundleIdentifier": "com.vasilyk.notebook",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.vasilyk.notebook",
@@ -18,7 +25,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6750A4"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "plugins": [
       "expo-sqlite",
@@ -71,6 +83,7 @@
       "eas": {
         "projectId": "6286d782-8a12-42fd-80f8-93801cde2a38"
       }
-    }
+    },
+    "owner": "vasilyk"
   }
 }
