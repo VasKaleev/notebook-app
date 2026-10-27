@@ -8,9 +8,14 @@ node_modules/
 npm-debug.log*
 yarn-error.log*
 
-# Native
-android/
-ios/
+# Native (только корень проекта — не путать с src/widgets/android/)
+/android/
+/ios/
+
+# Артефакты expo export:embed
+index.android.bundle
+assets/drawable-*/
+assets/raw/
 
 # Metro
 .metro-health-check*
@@ -19,10 +24,4 @@ ios/
 .DS_Store
 *.log
 .env
-
-
-# Исключаем артефакты сборки
-android/build/
-android/app/build/
-
-
+kak razmestit.md
